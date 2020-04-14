@@ -34,11 +34,11 @@ void Location::seirModelling()
 
         for (std::list<Person *>::iterator iterPerson = iter->m_personList.begin(); iterPerson != iter->m_personList.end(); ++iterPerson)
         {
-            if ((*iterPerson)->m_state == Infectious || (*iterPerson)->m_state == Recovered)
+            if ((*iterPerson)->m_state == Exposed || (*iterPerson)->m_state == Infectious || (*iterPerson)->m_state == Recovered)
             {
                 for (std::list<Person *>::iterator iterTarget = iter->m_personList.begin(); iterTarget != iter->m_personList.end(); ++iterTarget)
                 {
-                    if ((*iterPerson)->m_state == Susceptible)
+                    if ((*iterTarget)->m_state == Susceptible)
                     {
                         modelContact(*iterPerson, *iterTarget, iter->m_timeStart, iter->m_timeEnd);
                     }

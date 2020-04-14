@@ -14,8 +14,8 @@ const double ItoSProbability = 0.35;                // вероятность в
 const double RtoSProbability = 0.35;                // вероятность восприимчивому заразиться при встрече с выздоровевшим
 const double ItoRProbabilityWithMedic = 0.10;       // вероятность выздоровления при больничном лечении
 const double ItoRProbability = 0.03;                // вероятность выздоровления без больничного лечения
-const double ItoDProbabilityWithMedic = 0.01;       // вероятность смерти при больничном лечении
-const double ItoDProbability = 0.20;                // вероятность смерти без больничного лечения
+const double ItoDProbabilityWithMedic = 0.015;      // вероятность смерти при больничном лечении
+const double ItoDProbability = 0.10;                // вероятность смерти без больничного лечения
 
 const double HardSymptomsProbability = 0.16;        // Вероятность возникновения тяжелой симптоматики
 const double EtoIDuration = 5.2;                    // Средняя длительность инкубационного периода

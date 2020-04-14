@@ -40,7 +40,7 @@ public:
     // изменить состояние на "Умерший"
     virtual void setDead(double time);
 
-    // установить карантин (пока нет мед помощи сидит дома)
+    // установить карантин (пока нет моделирования мед помощи сидит дома)
     void setQuarantine();
 
 public:
@@ -48,13 +48,13 @@ public:
 	Location *m_home;			        // локация по-умолчанию
 	PersonShedule m_shedule;	        // расписание на день
 
-    double m_timeExposed;
-    Person *m_exposedSource;
-    double m_timeSymptoms;
-    double m_timeInfected;
-    double m_timeRecovered;
-    double m_timeDead;
-    bool m_isOnQuarantine;
+    double m_timeExposed;               // день и время заражения
+    Person *m_exposedSource;            // заразивший
+    double m_timeSymptoms;              // день и время появления симптомов
+    double m_timeInfected;              // день и время инфицирования
+    double m_timeRecovered;             // день и время выздоровления
+    double m_timeDead;                  // день и время смерти
+    bool m_isOnQuarantine;              // признак нахождения на карантине
 };
 
 // Класс домосед - сидит дома 24/7
@@ -97,7 +97,7 @@ public:
 };
 
 // Класс работник архива
-// относится к своему первому отделу
+// относится к своему архиву
 // может ходить в столовую
 // ходит в библиотеку?
 class ArchiveEmployee : public OrganizationEmployee
