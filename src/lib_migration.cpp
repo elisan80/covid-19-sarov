@@ -1,3 +1,4 @@
+#include "StdAfx.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -57,8 +58,8 @@ bool HumansConfigReader::TryAddData (std::string &data_string, HumanConfig &stor
 
 bool HumansConfigReader::ReadCfg()
 {//Return value:
-//true - РІСЃРµ С…РѕСЂРѕС€Рѕ
-//false - РІСЃРµ РїР»РѕС…Рѕ
+//true - все хорошо
+//false - все плохо
 
     std::ifstream ifs (_file_name);
     if (ifs.bad())
@@ -77,8 +78,8 @@ bool HumansConfigReader::ReadCfg()
 
 		int pos1 = s.find(pattern);
 		if (pos1 != std::string::npos)
-		{//РЅР°Р№РґРµРЅРѕ РЅР°С‡Р°Р»Рѕ РЅРѕРІРѕР№ СЃРµРєС†РёРё РїРѕ С‡РµР»РѕРІРµРєСѓ
-			//РЅР°Р№С‚Рё РР” С‡РµР»РѕРІРµРєР°
+		{//найдено начало новой секции по человеку
+			//найти ИД человека
 			int pos2 = s.find("]");
 			if (pos2 == std::string::npos)
 			{
@@ -89,11 +90,11 @@ bool HumansConfigReader::ReadCfg()
 			std::string s2 = s.substr( pos1, pos2 - pos1);
 			int tmp_id = std::stoi (s2);
 			if (one_human.human_id >= 0)
-			{//СЃРѕС…СЂР°РЅРёС‚СЊ РїСЂРµРґС‹РґСѓС‰РµРіРѕ С‡РµР»РѕРІРµРєР° РІ РјР°СЃСЃРёРІ
+			{//сохранить предыдущего человека в массив
 				_humans_config.push_back (one_human);
 			}
 
-			//РЅР°С‡РёРЅР°РµС‚СЃСЏ РєРѕРЅС„РёРіСѓСЂР°С†РёСЏ РґР»СЏ РЅРѕРІРѕРіРѕ С‡РµР»РѕРІРµРєР°
+			//начинается конфигурация для нового человека
 			one_human.human_id = tmp_id;
 			one_human.locations.clear();
 		}
@@ -106,7 +107,7 @@ bool HumansConfigReader::ReadCfg()
 		}
 
 		if (!ifs)
-		{//РѕСЃРѕР±С‹Р№ СЃР»СѓС‡Р°Р№ - РїРѕСЃР»РµРґРЅСЏСЏ Р·Р°РїРёСЃСЊ
+		{//особый случай - последняя запись
 			_humans_config.push_back (one_human);
 		}
 	}
@@ -115,10 +116,10 @@ bool HumansConfigReader::ReadCfg()
 }
 
 
-HumansMigration::HumansMigration() 
+HumansMigration::HumansMigration(int days_amount) 
 {
-	srand( (unsigned)time( NULL ) ); //РёРЅРёС†Р°РёР»РёР·Р°С†РёСЋ РјРѕР¶РЅРѕ РґРµР»Р°С‚СЊ РїРѕ РєР»СЋС‡Сѓ РєР°Рє РІ РЅР°С€РёС… РїСЂРѕРµРєС‚Р°С… - РґР»СЏ РїРѕРІС‚РѕСЂСЏРµРјРѕСЃС‚Рё СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ.
-	for (int i = 0; i < 7; ++i)
+	srand( (unsigned)time( NULL ) ); //иницаилизацию можно делать по ключу как в наших проектах - для повторяемости результатов.
+	for (int i = 0; i < days_amount; ++i)
 	{
 		_humans_config.push_back(std::list <HumanConfig> ());
 		_humans_time_laps.push_back (std::list<TimeLaps> ());
@@ -127,7 +128,7 @@ HumansMigration::HumansMigration()
 
 bool HumansMigration::Init (const std::string file_name, int day)
 {
-	HumansConfigReader hcr (file_name, _humans_config[day]); //Р·РґРµСЃСЊ РїРѕРґСЃС‚Р°РІР»СЏС‚СЊ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ РЅСѓР¶РЅРѕРіРѕ С„Р°Р№Р»Р° Рё СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРіРѕ РµРјСѓ РјР°СЃСЃРёРІР°
+	HumansConfigReader hcr (file_name, _humans_config[day]); //здесь подставлять соответствие нужного файла и соответствующего ему массива
 	hcr.ReadCfg();
 	return true;
 }
@@ -150,20 +151,20 @@ void HumansMigration::ShowConfig ()
 
 
 bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_)
-{//РћСЃСѓС‰РµСЃС‚РІРёС‚СЊ РїРµСЂРµРјРµС‰РµРЅРёРµ 1 Р°РіРµРЅС‚Р° (СЃРѕР·РґР°С‚СЊ СЂР°СЃРїРёСЃР°РЅРёРµ РїРѕ РѕРґРЅРѕРјСѓ Р°РіРµРЅС‚Сѓ)
+{//Осуществить перемещение 1 агента (создать расписание по одному агенту)
 	TimeLaps time_laps;
 	time_t cur_time = 0;
 	time_laps.human_id = human_cfg.human_id;
 
-	while (cur_time < (23 * 3600 + 59 * 60) ) //РІСЂРµРјСЏ СЃСѓС‚РѕРє
+	while (cur_time < (23 * 3600 + 59 * 60) ) //время суток
 	{
-		//РЅР°Р№С‚Рё РІСЃРµ Р»РѕРєР°С†РёРё, РІ РєРѕС‚РѕСЂС‹С… Р°РіРµРЅС‚Сѓ СЂР°Р·СЂРµС€РµРЅРѕ РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ СЌС‚Рѕ РІСЂРµРјСЏ
+		//найти все локации, в которых агенту разрешено находиться в это время
 		std::vector <LocationConfig> possible_locations;
 		for (auto itr_location = human_cfg.locations.begin(); itr_location != human_cfg.locations.end(); ++itr_location)
 		{
-			if (itr_location->start_time <=cur_time && itr_location->end_time > cur_time) //LEV!!!!! Р·РґРµСЃСЊ РЅР°РґРѕ РµС‰Рµ РґРѕР±Р°РІРёС‚СЊ РїСЂРѕРІРµСЂРєСѓ РЅР° С‚Рѕ, С‡С‚Рѕ РјРёРЅРёР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ РЅРµ РїРµСЂРµС…РѕРґРёС‚ РіСЂР°РЅРёС†С‹ СЂР°СЃРїРёСЃР°РЅРёСЏ РґР»СЏ СЌС‚РѕР№ Р»РѕРєР°С†РёРё
+			if (itr_location->start_time <=cur_time && itr_location->end_time > cur_time) //LEV!!!!! здесь надо еще добавить проверку на то, что миниальное время не переходит границы расписания для этой локации
 			{
-				possible_locations.push_back (*itr_location); //Р·РґРµСЃСЊ РјРѕР¶РЅРѕ СЃРґРµР»Р°С‚СЊ РЅР° С…СЂР°РЅРµРЅРёРµ СѓРєР°Р·Р°С‚РµР»РµР№, РЅРѕ СЃРµР№С‡Р°СЃ РЅРµ РґРѕ СЌС‚РѕРіРѕ
+				possible_locations.push_back (*itr_location); //здесь можно сделать на хранение указателей, но сейчас не до этого
 			}
 		}
 
@@ -174,13 +175,13 @@ bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_l
 			throw (err);
 		}
 
-		//РїСЂРѕРІРµСЃС‚Рё СЂРѕР·С‹РіСЂС‹С€ РІРµСЂРѕСЏС‚РЅРѕСЃС‚РµР№
+		//провести розыгрыш вероятностей
 		int pos_min = -1, pos = -1;
 		for (int cnt = 0; cnt < 1000 && pos_min == -1; ++cnt)
 		{
 			for (int i = 0;  i < possible_locations.size(); ++i)
 			{
-				double r = (double)rand() / ((double)RAND_MAX); //LEV!!!! РїРѕС‚РѕРј РЅР°РґРѕ Р±СѓРґРµС‚ РїРµСЂРµРґРµР»Р°С‚СЊ РЅР°СЃСѓРјРјРёСЂРѕРІР°РЅРёРµ РІРµСЂРѕСЏС‚РЅРѕСЃС‚РµР№ Рё СЂР°РІРЅРѕРјРµСЂРЅРѕРµ СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РїРѕ РІСЃРµРјСѓ РёРЅС‚РµСЂРІР°Р»Сѓ, РїРѕС‚РѕРјСѓ С‡С‚Рѕ СЃРµР№С‡Р°СЃ РјРѕР¶РЅРѕ РїСЂРѕСЃС‚Рѕ С‚СѓРїРѕ РЅРµ РїРѕРїР°СЃС‚СЊ РІ РјРµР»РєРё РІРµСЂРѕСЏС‚РЅРѕСЃС‚Рё.
+				double r = (double)rand() / ((double)RAND_MAX); //LEV!!!! потом надо будет переделать насуммирование вероятностей и равномерное распределение по всему интервалу, потому что сейчас можно просто тупо не попасть в мелки вероятности.
 				if (possible_locations[i].probability >= r)
 				{
 					pos = i;
@@ -191,7 +192,7 @@ bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_l
 					else
 					{
 						if (possible_locations[pos_min].probability > possible_locations[pos].probability)
-						{//РІСЃРµРіРґР° РѕС‚РґР°РµРј РїСЂРёРѕСЂРёС‚РµС‚ Р»РѕРєР°С†РёРё СЃ РјРµРЅСЊС€РёРј С€Р°РЅСЃРѕРј РЅР° РІС‹РёРіСЂС‹С€
+						{//всегда отдаем приоритет локации с меньшим шансом на выигрыш
 							pos_min = pos;
 						}
 					}
@@ -199,12 +200,12 @@ bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_l
 			}
 		}
 		if (pos_min == -1)
-		{//РµСЃР»Рё СЃР»СѓС‡Р°Р№РЅРѕСЃС‚СЊ РЅРёС‡РµРіРѕ РЅР°Рј РЅРµ РґР°Р»Р° С‚Рѕ РїСЂРѕСЃС‚Рѕ РІРѕР·СЊРјРµРј РїРµСЂРІСѓСЋ РїРѕРїР°РІС€СѓСЋСЃСЏ Р»РѕРєР°С†РёСЋ
+		{//если случайность ничего нам не дала то просто возьмем первую попавшуюся локацию
 			std::cout << "WARNING! Using default position!" << std::endl;
 			pos_min = 0;
 		}
 
-		//РґР»СЏ РїРѕР±РµРґРёРІС€РµР№ Р»РѕРєР°С†РёРё РЅР°Р№РґРµРј РІСЂРµРјСЏ РїСЂРµР±С‹РІР°РЅРёСЏ (РѕС‚ РјРёРЅ РґРѕ РјР°РєСЃ)
+		//для победившей локации найдем время пребывания (от мин до макс)
 		int period_time = (double)rand() / (RAND_MAX + 1) * (possible_locations[pos_min].max_time - possible_locations[pos_min].min_time) + possible_locations[pos_min].min_time;
 		if (cur_time + period_time > possible_locations[pos_min].end_time )
 		{
@@ -225,7 +226,7 @@ bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_l
 }
 
 bool HumansMigration::MakeAllMigrations ()
-{//РћСЃСѓС‰РµСЃС‚РІРёС‚СЊ РІСЃРµ РїРµСЂРµРјРµС‰РµРЅРёСЏ Р°РіРµРЅС‚РѕРІ
+{//Осуществить все перемещения агентов
 	for (int i = 0; i < _humans_config.size(); ++i)
 	{
 		for (auto itr1 = _humans_config[i].begin(); itr1 != _humans_config[i].end(); ++itr1)
@@ -240,8 +241,21 @@ bool HumansMigration::MakeAllMigrations ()
 	return true;
 }
 
+bool HumansMigration::MakeDayMigration (int day_index)
+{// Осуществить перемещения агентов на указанный день
+	for (auto itr1 = _humans_config[day_index].begin(); itr1 != _humans_config[day_index].end(); ++itr1)
+	{
+		TimeLaps one_agent_time_laps;
+		if (MakeOneMigration (*itr1, one_agent_time_laps))
+		{
+			_humans_time_laps[day_index].push_back (one_agent_time_laps);
+		}
+	}
+	return true;
+}
+
 void HumansMigration::ShowMigration(std::string show_path)
-{//РїРѕ СѓРєР°Р·Р°РЅРЅРѕРјСѓ РїСѓС‚Рё СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»С‹. РїРѕ РѕРґРЅРѕРјСѓ РЅР° РєР°Р¶РґРѕРіРѕ Р°РіРµРЅС‚Р°, СЃ РµРіРѕ С‚Р°Р№РјР»Р°РїСЃР°РјРё
+{//по указанному пути создать файлы. по одному на каждого агента, с его таймлапсами
 	for (int i = 0; i < _humans_time_laps.size(); ++i)
 	{
 		for (auto itr = _humans_time_laps[i].begin(); itr != _humans_time_laps[i].end(); ++itr)
