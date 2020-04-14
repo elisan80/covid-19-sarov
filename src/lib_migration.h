@@ -27,7 +27,7 @@ private:
 
 
 /*
-  ласс расчитывает миграцию людей между локаци¤ми на основании конфигурационного файла.
+  Класс расчитывает миграцию людей между локациями на основании конфигурационного файла.
 */
 class HumansMigration
 {
@@ -36,14 +36,14 @@ public:
 	bool Init (const std::string file_name, int day);
 	void ShowConfig ();
 
-	bool MakeAllMigrations (); //ќсуществить все перемещени¤ агентов
-	bool MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_); //ќсуществить перемещение 1 агента (создать расписание по одному агенту)
+	bool MakeAllMigrations (); //осуществить все перемещения агентов
+	bool MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_); //осуществить перемещение 1 агента (создать расписание по одному агенту)
 	void ShowMigration(std::string show_path); //по указанному пути создать файлы. по одному на каждого агента, с его таймлапсами
 
 protected:
-	//std::list <HumanConfig> _humans_config_0; //конфигураци¤ по всем люд¤м
+	//std::list <HumanConfig> _humans_config_0; //конфигурация по всем людям
 	//std::list<TimeLaps> _humans_time_laps_0; // результирующие данные - расписание всех агентов за сутки
-	std::vector<std::list <HumanConfig> > _humans_config; //конфигураци¤ по всем люд¤м по всем дн¤м (0 - понедельник, 1 - вторник, ..., 6 - воскресенье)
+	std::vector<std::list <HumanConfig> > _humans_config; //конфигурация по всем людям по всем дням (0 - понедельник, 1 - вторник, ..., 6 - воскресенье)
 	std::vector<std::list<TimeLaps> > _humans_time_laps; // результирующие данные - расписание всех агентов за сутки
 };
 
