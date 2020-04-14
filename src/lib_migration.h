@@ -1,4 +1,5 @@
-
+#ifndef _LIB_MIGRATION_
+#define _LIB_MIGRATION_
 
 #include "data_types.h"
 #include <iostream>
@@ -26,7 +27,7 @@ private:
 
 
 /*
- Класс расчитывает миграцию людей между локациями на основании конфигурационного файла.
+ В Р»Р°СЃСЃ СЂР°СЃС‡РёС‚С‹РІР°РµС‚ РјРёРіСЂР°С†РёСЋ Р»СЋРґРµР№ РјРµР¶РґСѓ Р»РѕРєР°С†РёВ¤РјРё РЅР° РѕСЃРЅРѕРІР°РЅРёРё РєРѕРЅС„РёРіСѓСЂР°С†РёРѕРЅРЅРѕРіРѕ С„Р°Р№Р»Р°.
 */
 class HumansMigration
 {
@@ -35,13 +36,15 @@ public:
 	bool Init (const std::string file_name, int day);
 	void ShowConfig ();
 
-	bool MakeAllMigrations (); //Осуществить все перемещения агентов
-	bool MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_); //Осуществить перемещение 1 агента (создать расписание по одному агенту)
-	void ShowMigration(std::string show_path); //по указанному пути создать файлы. по одному на каждого агента, с его таймлапсами
+	bool MakeAllMigrations (); //СњСЃСѓС‰РµСЃС‚РІРёС‚СЊ РІСЃРµ РїРµСЂРµРјРµС‰РµРЅРёВ¤ Р°РіРµРЅС‚РѕРІ
+	bool MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_); //СњСЃСѓС‰РµСЃС‚РІРёС‚СЊ РїРµСЂРµРјРµС‰РµРЅРёРµ 1 Р°РіРµРЅС‚Р° (СЃРѕР·РґР°С‚СЊ СЂР°СЃРїРёСЃР°РЅРёРµ РїРѕ РѕРґРЅРѕРјСѓ Р°РіРµРЅС‚Сѓ)
+	void ShowMigration(std::string show_path); //РїРѕ СѓРєР°Р·Р°РЅРЅРѕРјСѓ РїСѓС‚Рё СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»С‹. РїРѕ РѕРґРЅРѕРјСѓ РЅР° РєР°Р¶РґРѕРіРѕ Р°РіРµРЅС‚Р°, СЃ РµРіРѕ С‚Р°Р№РјР»Р°РїСЃР°РјРё
 
 protected:
-	//std::list <HumanConfig> _humans_config_0; //конфигурация по всем людям
-	//std::list<TimeLaps> _humans_time_laps_0; // результирующие данные - расписание всех агентов за сутки
-	std::vector<std::list <HumanConfig> > _humans_config; //конфигурация по всем людям по всем дням (0 - понедельник, 1 - вторник, ..., 6 - воскресенье)
-	std::vector<std::list<TimeLaps> > _humans_time_laps; // результирующие данные - расписание всех агентов за сутки
+	//std::list <HumanConfig> _humans_config_0; //РєРѕРЅС„РёРіСѓСЂР°С†РёВ¤ РїРѕ РІСЃРµРј Р»СЋРґВ¤Рј
+	//std::list<TimeLaps> _humans_time_laps_0; // СЂРµР·СѓР»СЊС‚РёСЂСѓСЋС‰РёРµ РґР°РЅРЅС‹Рµ - СЂР°СЃРїРёСЃР°РЅРёРµ РІСЃРµС… Р°РіРµРЅС‚РѕРІ Р·Р° СЃСѓС‚РєРё
+	std::vector<std::list <HumanConfig> > _humans_config; //РєРѕРЅС„РёРіСѓСЂР°С†РёВ¤ РїРѕ РІСЃРµРј Р»СЋРґВ¤Рј РїРѕ РІСЃРµРј РґРЅВ¤Рј (0 - РїРѕРЅРµРґРµР»СЊРЅРёРє, 1 - РІС‚РѕСЂРЅРёРє, ..., 6 - РІРѕСЃРєСЂРµСЃРµРЅСЊРµ)
+	std::vector<std::list<TimeLaps> > _humans_time_laps; // СЂРµР·СѓР»СЊС‚РёСЂСѓСЋС‰РёРµ РґР°РЅРЅС‹Рµ - СЂР°СЃРїРёСЃР°РЅРёРµ РІСЃРµС… Р°РіРµРЅС‚РѕРІ Р·Р° СЃСѓС‚РєРё
 };
+
+#endif // _LIB_MIGRATION_

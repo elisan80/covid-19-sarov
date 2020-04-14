@@ -28,3 +28,4 @@ add_executable(covid19sarov ${SOURCE_EXE})
 add_executable(migration_main ${MIGRATION_EXE})
 
 target_link_libraries(covid19sarov covid19sarov_lib)
+target_link_libraries(migration_main covid19sarov_lib)

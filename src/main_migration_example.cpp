@@ -1,16 +1,15 @@
-// Migration.cpp: определяет точку входа для консольного приложения.
+// Migration.cpp: РѕРїСЂРµРґРµР»СЏРµС‚ С‚РѕС‡РєСѓ РІС…РѕРґР° РґР»СЏ РєРѕРЅСЃРѕР»СЊРЅРѕРіРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.
 //
 
-#include "stdafx.h"
 #include <string>
 
 #include "lib_migration.h"
 
 
-int _tmain(int argc, _TCHAR* argv[])
+int main()
 {
 	HumansMigration hm;
-	hm.Init("c:/tmp/covid/humans.dat", 0); //здесь для каждого дня должен указываться свой файл. Пока везде стоит один и тот же.
+	hm.Init("c:/tmp/covid/humans.dat", 0); //Р·РґРµСЃСЊ РґР»СЏ РєР°Р¶РґРѕРіРѕ РґРЅСЏ РґРѕР»Р¶РµРЅ СѓРєР°Р·С‹РІР°С‚СЊСЃСЏ СЃРІРѕР№ С„Р°Р№Р». РџРѕРєР° РІРµР·РґРµ СЃС‚РѕРёС‚ РѕРґРёРЅ Рё С‚РѕС‚ Р¶Рµ.
 	hm.Init("c:/tmp/covid/humans.dat", 1);
 	hm.Init("c:/tmp/covid/humans.dat", 2);
 	hm.Init("c:/tmp/covid/humans.dat", 3);
