@@ -1,6 +1,7 @@
 #include "Location.h"
 
 #include "Person.h"
+#include "Model.h"
 
 Location::Location() :
     m_beta(EtoSProbability),
@@ -36,7 +37,7 @@ void Location::seirModelling()
                 {
                     if ((*iterPerson)->m_state == Susceptible)
                     {
-                        modelContact(*iterPerson, *iterTarget);
+                        modelContact(*iterPerson, *iterTarget, iter->m_timeStart, iter->m_timeEnd);
                     }
                 }
             }
@@ -44,7 +45,7 @@ void Location::seirModelling()
     }
 }
 
-void Location::modelContact(Person *source, Person *target)
+void Location::modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds)
 {
     double probability = 0.0;
     switch (source->m_state)
@@ -62,9 +63,10 @@ void Location::modelContact(Person *source, Person *target)
         break;
     }
 
+    Model &model = Model::instance();
     double randValue = (std::rand() % 100) / 100.0;
     if (randValue < probability)
-        target->setExposed(source, );
+        target->setExposed(source, model.m_currentDay, (timeStartInSeconds + timeEndInSeconds)/2);
 }
 
 Home::Home()

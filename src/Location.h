@@ -28,7 +28,7 @@ public:
     void seirModelling();
 
     // Моделирование контакта source-target
-    void modelContact(Person *source, Person *target);
+    void modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds);
 
 public:
     double m_beta;		// коэффициент перехода от восприимчивого к инкубационному периоду

@@ -22,7 +22,7 @@ public:
     std::vector<Location *> allLocations;
 
 private:
-    Model() {}
+    Model();
     Model(const Model&);
 
 private:
