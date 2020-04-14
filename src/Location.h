@@ -135,7 +135,7 @@ public:
     ~Group() {}
 
     // планерка
-    void meeting();
+    //void meeting();
 
     Department *m_department;           // отдел, к которому относится
     Employee *m_headOfGroup;            // начальник

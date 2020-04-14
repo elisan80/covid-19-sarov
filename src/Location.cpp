@@ -25,6 +25,9 @@ bool Location::hasEIRPerson()
 
 void Location::seirModelling()
 {
+    if (!hasEIRPerson())
+        return;
+
     for (std::list<LocationSheduleSection>::iterator iter = m_locationShedule.m_sectionList.begin(); iter != m_locationShedule.m_sectionList.end(); ++iter)
     {
         double interactionTime = iter->m_timeEnd - iter->m_timeStart;
@@ -66,16 +69,10 @@ void Location::modelContact(Person *source, Person *target, double timeStartInSe
     Model &model = Model::instance();
     double randValue = (std::rand() % 100) / 100.0;
     if (randValue < probability)
-        target->setExposed(source, model.m_currentDay, (timeStartInSeconds + timeEndInSeconds)/2);
+        target->setExposed(source, model.m_currentDay + ((timeStartInSeconds + timeEndInSeconds)/2.0)/86400.0);
 }
 
 Home::Home()
 {
     m_beta = EtoSProbability * 2.0; // Увеличенная вероятность заражения дома
-}
-
-void Group::meeting()
-{
-	// по вероятности планерки проверяем, будет ли сегодня планерка
-	// если да - всем работникам добавляем локацию
 }
