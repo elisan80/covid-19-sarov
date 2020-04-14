@@ -16,7 +16,7 @@ Model& Model::instance()
 void Model::startNewDay()
 {
     ++m_currentDay;
-    bool isWorkingDay = m_currentDay % 7 >= 5; // рабочий ли день
+    bool isWorkingDay = m_currentDay % 7 < 5; // рабочий ли день
 
     for (std::vector<Location *>::iterator iter = allLocations.begin(); iter != allLocations.end(); ++iter)
     {
@@ -28,6 +28,9 @@ void Model::startNewDay()
     {
         // чистим расписание агентов
         (*iter)->m_shedule.clear();
+
+        // проверяем состояние агентов
+        (*iter)->checkState();
 
         // генерируем новое расписание
         if (isWorkingDay)
@@ -44,4 +47,6 @@ void Model::startNewDay()
         // генерируем расписание локации из кусочков, полученных от агентов
         (*iter)->m_locationShedule.generate();
     }
+
+
 }
