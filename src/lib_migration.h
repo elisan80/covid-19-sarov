@@ -42,7 +42,7 @@ public:
 protected:
 	bool MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_); //Осуществить перемещение 1 агента (создать расписание по одному агенту)
 
-protected:
+public:
 	//std::list <HumanConfig> _humans_config_0; //конфигурация по всем людям
 	//std::list<TimeLaps> _humans_time_laps_0; // результирующие данные - расписание всех агентов за сутки
 	std::vector<std::list <HumanConfig> > _humans_config; //конфигурация по всем людям по всем дням (0 - понедельник, 1 - вторник, ..., 6 - воскресенье)

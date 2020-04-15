@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+//#include "StdAfx.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -222,13 +222,14 @@ bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_l
 	}
 
 	time_laps_ = time_laps;
-	std::cout << "One migration is ready\n";
+	//std::cout << "One migration is ready\n";
 }
 
 bool HumansMigration::MakeAllMigrations ()
 {//ќсуществить все перемещени€ агентов
 	for (int i = 0; i < _humans_config.size(); ++i)
 	{
+		_humans_time_laps[i].clear();
 		for (auto itr1 = _humans_config[i].begin(); itr1 != _humans_config[i].end(); ++itr1)
 		{
 			TimeLaps one_agent_time_laps;
@@ -243,6 +244,7 @@ bool HumansMigration::MakeAllMigrations ()
 
 bool HumansMigration::MakeDayMigration (int day_index)
 {// ќсуществить перемещени€ агентов на указанный день
+	_humans_time_laps[day_index].clear();
 	for (auto itr1 = _humans_config[day_index].begin(); itr1 != _humans_config[day_index].end(); ++itr1)
 	{
 		TimeLaps one_agent_time_laps;

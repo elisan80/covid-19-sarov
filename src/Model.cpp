@@ -79,6 +79,7 @@ void Model::startNewDay()
 void Model::writeOutput()
 {
     if (m_outputStream->is_open())
+    {
         *m_outputStream
             << m_currentDay << " "
             << personNumber - exposedPersons.size() - infectedPersons.size() - recoveredPersons.size() - deadPersons.size() << " "
@@ -86,4 +87,6 @@ void Model::writeOutput()
             << infectedPersons.size() << " "
             << recoveredPersons.size() << " "
             << deadPersons.size() << std::endl;
+        m_outputStream->flush();
+    }
 }

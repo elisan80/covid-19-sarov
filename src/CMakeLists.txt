@@ -17,6 +17,8 @@ set(SOURCE_LIB
 				data_types.h
 				lib_migration.h
 				lib_migration.cpp
+				translate_data.h
+				translate_data.cpp
 				)
 
 add_library(covid19sarov_lib STATIC ${SOURCE_LIB})
@@ -25,7 +27,7 @@ set(SOURCE_EXE main.cpp)
 set(MIGRATION_EXE main_migration_example.cpp)
 
 add_executable(covid19sarov ${SOURCE_EXE})
-add_executable(migration_main ${MIGRATION_EXE})
+#add_executable(migration_main ${MIGRATION_EXE})
 
 target_link_libraries(covid19sarov covid19sarov_lib)
-target_link_libraries(migration_main covid19sarov_lib)
+#target_link_libraries(migration_main covid19sarov_lib)
