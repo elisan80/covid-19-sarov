@@ -24,6 +24,9 @@ public:
     // Вывести в выходной файл статистику текущего дня моделирования
     void writeOutput();
 
+    // Вывести в выходной файл
+    void writeGraphvizFile();
+
 public:
     bool isModellingStopped;                // признак остановки моделирования
     int m_currentDay;                       // номер текущего дня
@@ -44,3 +47,6 @@ private:
     Model *m_instance;              // Указатель на инстанс, для реализации синглтона
     std::ofstream *m_outputStream;  // Указатель на поток файла выходных данных
 };
+
+
+bool eventWithProbability(double probability);

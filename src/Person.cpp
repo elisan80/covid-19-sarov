@@ -2,8 +2,10 @@
 
 #include "Location.h"
 #include "Model.h"
+#include "data_types.h"
 
 Person::Person() :
+    index(-1),
     m_state(Susceptible),
     m_timeExposed(-1.0),
     m_exposedSource(nullptr),
@@ -11,18 +13,46 @@ Person::Person() :
     m_timeInfected(-1.0),
     m_timeRecovered(-1.0),
     m_timeDead(-1.0),
-    m_isOnQuarantine(false)
+    m_isOnQuarantine(false),
+    workingDayConfig(nullptr),
+    dayOffConfig(nullptr)
 {
     Model &model = Model::instance();
     ++model.personNumber;
 }
 
-void Person::generateShedule()
+void Person::generateShedule(bool isWorkingDay)
 {
-}
+    Model &model = Model::instance();
+    HumanConfig *currentConfig;
+    if (!isWorkingDay || !workingDayConfig)
+        currentConfig = dayOffConfig;
+    else
+        currentConfig = workingDayConfig;
 
-void Person::generateDayOffShedule()
-{
+    bool isFirstLocation = true;
+    for (std::list<LocationConfig>::iterator iter = currentConfig->locations.begin(); iter != currentConfig->locations.end(); ++iter)
+    {
+        if (isFirstLocation)
+        {
+            m_shedule.addLocation(model.allLocations.at(iter->location_id - 100000), 0, 86400);
+            isFirstLocation = false;
+            continue;
+        }
+        if (eventWithProbability(iter->probability))
+        {
+            // идем сегодня в эту локацию
+            int duration = iter->min_time;
+            int durationDelta = (iter->max_time - iter->min_time);
+            if (durationDelta > 0)
+                duration += (std::rand() % durationDelta);
+            int startTime = iter->start_time;
+            int startTimeDelta = ((iter->end_time - iter->start_time) - duration);
+            if (startTimeDelta > 0)
+                startTime += (std::rand() % startTimeDelta);
+            m_shedule.addLocation(model.allLocations.at(iter->location_id - 100000), startTime, startTime + duration);
+        }
+    }
 }
 
 // Сообщить локации о своем присутствии сегодня

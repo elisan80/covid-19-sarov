@@ -5,6 +5,8 @@
 #include "translate_data.h" //LEV 
 #include "lib_migration.h"  //LEV
 
+#include <ctime>
+
 
 /*void main()
 {
@@ -26,25 +28,37 @@
 
 void main()
 {
+    std::srand(std::time(nullptr));
     Model& model = Model::instance();
     
     model.allLocations.resize(57000);           //LEV ���������� ������� (���� �������)
     model.allPersons.resize(100000);            //LEV ���������� ������� (���� ���������)
     const int TYPES_DAYS_AMOUNT = 2;            //LEV
     HumansMigration hm(TYPES_DAYS_AMOUNT);      //LEV
-    hm.Init("c:/tmp/covid/humans_0.dat", 0); //���� ��� ������� ����   ����!!!!!     //LEV
-    hm.Init("c:/tmp/covid/humans_work.dat", 1); //���� ��� �������� ���� ����!!!!!   //LEV
+    std::cout << "reading first config file started" << std::endl;
+    if (!hm.Init("humans_holiday.dat", 0)) //���� ��� ������� ����   ����!!!!!     //LEV
+    {
+        std::cout << "can't read file humans_holiday.dat" << std::endl;
+        return;
+    }
+
+    std::cout << "reading second config file started" << std::endl;
+    if (!hm.Init("humans_25.dat", 1)) //���� ��� �������� ���� ����!!!!!   //LEV
+    {
+        std::cout << "can't read file humans_25.dat" << std::endl;
+        return;
+    }
     //hm.ShowConfig();                          //LEV
     translate::translate_data( &model, &hm );   //������� ���������������� ������ �� ����� � ��������. //LEV
     int modelling_days_amount = 14; //������� ���� ���������� (������� ���� ����� ���������, ������ ���, ��� ���, ��� ���� �������)    //LEV
 
     {
         int days_cnt = 0;
-        model.allPersons[30000]->setExposed(model.allPersons[30000], 0);
+        model.allPersons[0]->setExposed(model.allPersons[0], 0);
         model.writeOutput();
         while (!model.isModellingStopped)
         {
-            for (int i = 0; i < 5 && days_cnt < modelling_days_amount; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 ++days_cnt;
                 hm.MakeDayMigration(0); //����� ������� ���������� ������ �� ������� ���
@@ -53,7 +67,7 @@ void main()
                 model.writeOutput();
                 std::cout << "day " << days_cnt << " ended" << std::endl;
             }
-            for (int i = 0; i < 2 && days_cnt < modelling_days_amount; ++i)
+            for (int i = 0; i < 2; ++i)
             {
                 ++days_cnt;
                 hm.MakeDayMigration(1); //����� ������� ���������� ������ �� �������� ���
@@ -63,6 +77,8 @@ void main()
                 std::cout << "day " << days_cnt << " ended" << std::endl;
             }
         }
+        model.writeGraphvizFile();
+        std::cout << "Modelling stopped" << std::endl;
     }
 
 

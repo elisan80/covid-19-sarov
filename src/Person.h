@@ -8,6 +8,7 @@ class Group;
 class Archive;
 class Library;
 class Canteen;
+struct HumanConfig;
 
 // Базовый класс агента, имеет расписание на день, текущее состояние
 class Person
@@ -17,10 +18,7 @@ public:
 	virtual ~Person() {}
 
     // генерация расписания рабочего дня
-    virtual void generateShedule();
-
-    // генерация расписания выходного дня
-	void generateDayOffShedule();
+    virtual void generateShedule(bool isWorkingDay);
 
     // Сообщить локации о своем присутствии сегодня
     void notifyLocations();
@@ -44,6 +42,7 @@ public:
     void setQuarantine();
 
 public:
+    int index;
 	SEIR_State m_state;			        // состояние по SEIR-модели
 	Location *m_home;			        // локация по-умолчанию
 	PersonShedule m_shedule;	        // расписание на день
@@ -55,6 +54,9 @@ public:
     double m_timeRecovered;             // день и время выздоровления
     double m_timeDead;                  // день и время смерти
     bool m_isOnQuarantine;              // признак нахождения на карантине
+
+    HumanConfig *workingDayConfig;
+    HumanConfig *dayOffConfig;
 };
 
 // Класс домосед - сидит дома 24/7

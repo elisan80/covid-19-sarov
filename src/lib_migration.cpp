@@ -61,8 +61,8 @@ bool HumansConfigReader::ReadCfg()
 //true - все хорошо
 //false - все плохо
 
-    std::ifstream ifs (_file_name);
-    if (ifs.bad())
+    std::ifstream ifs (_file_name, std::ifstream::in);
+    if (!ifs.is_open())
         return false;
 
 	std::string s_d;
@@ -129,8 +129,7 @@ HumansMigration::HumansMigration(int days_amount)
 bool HumansMigration::Init (const std::string file_name, int day)
 {
 	HumansConfigReader hcr (file_name, _humans_config[day]); //здесь подставлять соответствие нужного файла и соответствующего ему массива
-	hcr.ReadCfg();
-	return true;
+	return hcr.ReadCfg();
 }
 
 void HumansMigration::ShowConfig ()

@@ -21,6 +21,8 @@ namespace translate
             if (!model->allPersons[id])
             {//человек еще не заполнен - заполним его 
                 model->allPersons[id] = new Person();
+                model->allPersons[id]->index = id;
+                model->allPersons[id]->dayOffConfig = &(*itr);
             }
 
             //Проверка/создание локации
@@ -32,6 +34,24 @@ namespace translate
                 if (!model->allLocations[loc_id])
                 {//локация еще не создана - значит креэйтим
                     model->allLocations[loc_id] = new Location();
+                    model->allLocations[loc_id]->index = loc_id;
+                }
+            }
+        }
+        for (auto itr = phm->_humans_config[1].begin(); itr != phm->_humans_config[1].end(); ++itr)
+        {
+            int id = itr->human_id;
+            if (model->allPersons[id])
+            {
+                model->allPersons[id]->workingDayConfig = &(*itr);
+            }
+            for (auto itr2 = itr->locations.begin(); itr2 != itr->locations.end(); ++itr2)
+            {
+                int loc_id = itr2->location_id - LOCATIONS_OFFSET;
+                if (!model->allLocations[loc_id])
+                {//локация еще не создана - значит креэйтим
+                    model->allLocations[loc_id] = new Location();
+                    model->allLocations[loc_id]->index = loc_id;
                 }
             }
         }
