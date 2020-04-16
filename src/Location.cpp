@@ -58,7 +58,7 @@ void Location::seirModelling()
                 {
                     if ((*iterTarget)->m_state == Susceptible)
                     {
-                        if (eventWithProbability((iter->m_timeEnd - iter->m_timeStart) / 14400.0))
+                        if (eventWithProbability((iter->m_timeEnd - iter->m_timeStart) / 3600.0))
                             modelContact(*iterPerson, *iterTarget, iter->m_timeStart, iter->m_timeEnd);
                     }
                 }

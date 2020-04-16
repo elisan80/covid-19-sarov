@@ -56,26 +56,14 @@ void main()
         int days_cnt = 0;
         model.allPersons[0]->setExposed(model.allPersons[0], 0);
         model.writeOutput();
+        //hm.MakeDayMigration(0); //����� ������� ���������� ������ �� ������� ���
+        translate::translate_step(&model, &hm, 0);
         while (!model.isModellingStopped)
         {
-            for (int i = 0; i < 5; ++i)
-            {
-                ++days_cnt;
-                hm.MakeDayMigration(0); //����� ������� ���������� ������ �� ������� ���
-                translate::translate_step(&model, &hm, 0);
-                model.startNewDay(); // ������������� ���
-                model.writeOutput();
-                std::cout << "day " << days_cnt << " ended" << std::endl;
-            }
-            for (int i = 0; i < 2; ++i)
-            {
-                ++days_cnt;
-                hm.MakeDayMigration(1); //����� ������� ���������� ������ �� �������� ���
-                translate::translate_step(&model, &hm, 1);
-                model.startNewDay(); // ������������� ���
-                model.writeOutput();
-                std::cout << "day " << days_cnt << " ended" << std::endl;
-            }
+            ++days_cnt;
+            model.startNewDay(); // ������������� ���
+            model.writeOutput();
+            std::cout << "day " << days_cnt << " ended" << std::endl;
         }
         model.writeGraphvizFile();
         std::cout << "Modelling stopped" << std::endl;

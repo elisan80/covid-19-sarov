@@ -23,6 +23,9 @@ Person::Person() :
 
 void Person::generateShedule(bool isWorkingDay)
 {
+    if (!dayOffConfig && !workingDayConfig)
+        return;
+
     Model &model = Model::instance();
     HumanConfig *currentConfig;
     if (!isWorkingDay || !workingDayConfig)
@@ -143,4 +146,6 @@ void Person::setDead(double time)
 void Person::setQuarantine()
 {
     m_isOnQuarantine = true;
+    workingDayConfig = nullptr;
+    dayOffConfig = nullptr;
 }

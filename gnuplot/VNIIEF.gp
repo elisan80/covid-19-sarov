@@ -1,9 +1,10 @@
 set boxwidth 1.0 absolute  
-set key left top vertical 
+set key outside center top vertical Right reverse noenhanced 
+set key right top vertical 
 set style increment default
 set style data lines
-set xlabel 'Порядковый номер дня эпидемии'
-set ylabel 'Количество человек'
+set xlabel 'РџРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ РґРЅСЏ СЌРїРёРґРµРјРёРё'
+set ylabel 'РљРѕР»РёС‡РµСЃС‚РІРѕ С‡РµР»РѕРІРµРє'
 set grid
-set title 'Расчет для ВНИИЭФ'
-plot 'output.txt' using 1:2 title 'Количество не зараженных'lw 2 lt rgb 'blue', '' using 1:3 title 'Количество контактных' lw 2 lt rgb 'purple','' using 1:4 title 'Количество зараженных'lw 2 lt rgb 'red','' using  1:5 title 'Выздоровевшие' lw 2 lt rgb 'green','' using 1:6 title 'Количество умерших' lw 2 lt rgb 'black'
+set title 'Р Р°СЃС‡РµС‚ РґР»СЏ Р’РќРРР­Р¤'
+plot 'output.txt' using 1:2 title 'РљРѕР»РёС‡РµСЃС‚РІРѕ РЅРµ Р·Р°СЂР°Р¶РµРЅРЅС‹С…'lw 2 lt rgb 'blue', '' using 1:3 title 'РљРѕР»РёС‡РµСЃС‚РІРѕ РєРѕРЅС‚Р°РєС‚РЅС‹С…' lw 2 lt rgb 'purple','' using 1:4 title 'РљРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°СЂР°Р¶РµРЅРЅС‹С…'lw 2 lt rgb 'red','' using  1:5 title 'Р’С‹Р·РґРѕСЂРѕРІРµРІС€РёРµ' lw 2 lt rgb 'green','' using 1:6 title 'РљРѕР»РёС‡РµСЃС‚РІРѕ СѓРјРµСЂС€РёС…' lw 2 lt rgb 'black'

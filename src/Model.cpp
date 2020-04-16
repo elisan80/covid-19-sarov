@@ -27,11 +27,6 @@ Model& Model::instance()
 
 void Model::startNewDay()
 {
-    if (exposedPersons.size() == 0 && infectedPersons.size() == 0) // заканчиваем моделирование, если нет контактных и инфицированных
-        isModellingStopped = true;
-    if (m_currentDay > 180) // заканчиваем моделирование черз полгода, возможно зациклились
-        isModellingStopped = true;
-
     ++m_currentDay;
     bool isWorkingDay = m_currentDay % 7 < 5; // рабочий ли день
 
@@ -71,6 +66,17 @@ void Model::startNewDay()
         // генерируем расписание локации из кусочков, полученных от агентов
         (*iter)->m_locationShedule.generate();
         (*iter)->seirModelling();
+    }
+
+    if (exposedPersons.size() == 0 && infectedPersons.size() == 0) // заканчиваем моделирование, если нет контактных и инфицированных
+    {
+        isModellingStopped = true;
+        return;
+    }
+    if (m_currentDay > 180) // заканчиваем моделирование черз полгода, возможно зациклились
+    {
+        isModellingStopped = true;
+        return;
     }
 }
 
