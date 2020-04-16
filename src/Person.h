@@ -45,6 +45,7 @@ public:
     int index;
 	SEIR_State m_state;			        // состояние по SEIR-модели
 	Location *m_home;			        // локация по-умолчанию
+	Location *m_work;			        // локация работа
 	PersonShedule m_shedule;	        // расписание на день
 
     double m_timeExposed;               // день и время заражения

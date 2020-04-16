@@ -1,4 +1,4 @@
-// Migration.cpp: определяет точку входа для консольного приложения.
+// Migration.cpp: РѕРїСЂРµРґРµР»СЏРµС‚ С‚РѕС‡РєСѓ РІС…РѕРґР° РґР»СЏ РєРѕРЅСЃРѕР»СЊРЅРѕРіРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.
 //
 
 #include "stdafx.h"
@@ -11,23 +11,23 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	const int DAYS_AMOUNT = 2;
 	HumansMigration hm (DAYS_AMOUNT);
-	hm.Init("c:/tmp/covid/humans_work.dat", 0); //файл для рабочих дней
-	hm.Init("c:/tmp/covid/humans_holiday.dat", 1); //файл для выходных дней
+	hm.Init("c:/tmp/covid/humans_work.dat", 0); //С„Р°Р№Р» РґР»СЏ СЂР°Р±РѕС‡РёС… РґРЅРµР№
+	hm.Init("c:/tmp/covid/humans_holiday.dat", 1); //С„Р°Р№Р» РґР»СЏ РІС‹С…РѕРґРЅС‹С… РґРЅРµР№
 	hm.ShowConfig();
 
-	hm.MakeDayMigration (0);// сгенерить рабочий день
+	hm.MakeDayMigration (0);// СЃРіРµРЅРµСЂРёС‚СЊ СЂР°Р±РѕС‡РёР№ РґРµРЅСЊ
 	hm.ShowMigration("c:/tmp/covid/out0/");
 
-	hm.MakeDayMigration (0);// сгенерить еще рабочий день
+	hm.MakeDayMigration (0);// СЃРіРµРЅРµСЂРёС‚СЊ РµС‰Рµ СЂР°Р±РѕС‡РёР№ РґРµРЅСЊ
 	hm.ShowMigration("c:/tmp/covid/out1/");
 
-	hm.MakeDayMigration (0);// и еще один
+	hm.MakeDayMigration (0);// Рё РµС‰Рµ РѕРґРёРЅ
 	hm.ShowMigration("c:/tmp/covid/out2/");
 
-	hm.MakeDayMigration (0);// и т.д.
+	hm.MakeDayMigration (0);// Рё С‚.Рґ.
 	hm.ShowMigration("c:/tmp/covid/out3/");
 
-	hm.MakeDayMigration (1);// сгенерить выходной
+	hm.MakeDayMigration (1);// СЃРіРµРЅРµСЂРёС‚СЊ РІС‹С…РѕРґРЅРѕР№
 	hm.ShowMigration("c:/tmp/covid/out4/");
 	return 0;
 }

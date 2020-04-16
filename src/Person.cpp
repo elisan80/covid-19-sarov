@@ -33,27 +33,21 @@ void Person::generateShedule(bool isWorkingDay)
     else
         currentConfig = workingDayConfig;
 
-    bool isFirstLocation = true;
-    for (std::list<LocationConfig>::iterator iter = currentConfig->locations.begin(); iter != currentConfig->locations.end(); ++iter)
+    m_shedule.addLocation(m_home, 0, 86400);
+    for (std::list<LocationConfig *>::iterator iter = currentConfig->locations.begin(); iter != currentConfig->locations.end(); ++iter)
     {
-        if (isFirstLocation)
-        {
-            m_shedule.addLocation(model.allLocations.at(iter->location_id - 100000), 0, 86400);
-            isFirstLocation = false;
-            continue;
-        }
-        if (eventWithProbability(iter->probability))
+        if (eventWithProbability((*iter)->probability))
         {
             // идем сегодня в эту локацию
-            int duration = iter->min_time;
-            int durationDelta = (iter->max_time - iter->min_time);
+            int duration = (*iter)->min_time;
+            int durationDelta = ((*iter)->max_time - (*iter)->min_time);
             if (durationDelta > 0)
                 duration += (std::rand() % durationDelta);
-            int startTime = iter->start_time;
-            int startTimeDelta = ((iter->end_time - iter->start_time) - duration);
+            int startTime = (*iter)->start_time;
+            int startTimeDelta = (((*iter)->end_time - (*iter)->start_time) - duration);
             if (startTimeDelta > 0)
                 startTime += (std::rand() % startTimeDelta);
-            m_shedule.addLocation(model.allLocations.at(iter->location_id - 100000), startTime, startTime + duration);
+            m_shedule.addLocation((*iter)->location, startTime, startTime + duration);
         }
     }
 }
