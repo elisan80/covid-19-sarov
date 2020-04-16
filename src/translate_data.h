@@ -20,5 +20,5 @@ namespace translate
 	int translate_data(Model* model, HumansMigration *phm);//конвертаци€ конфигурационных данных
 
 	int translate_step (Model* model, HumansMigration* phm, int day_idx); // трансл€ци€ данных о ежедневном расписании
-	void ParseCmdLine(int argc, char* argv[], std::string& file_name1, std::string& file_name2, struct SEIRDcfg& seird_cfg);
+	void ParseCmdLine(int argc, char* argv[], std::string &data_dir, std::string& file_name1, std::string& file_name2, struct SEIRDcfg& seird_cfg);
 };

@@ -27,6 +27,9 @@ public:
     // Вывести в выходной файл
     void writeGraphvizFile();
 
+    //Установить новую директорию проекта
+    void SetProjectDir(const std::string& new_path);
+
 public:
     bool isModellingStopped;                // признак остановки моделирования
     int m_currentDay;                       // номер текущего дня
@@ -46,6 +49,7 @@ private:
 private:
     Model *m_instance;              // Указатель на инстанс, для реализации синглтона
     std::ofstream *m_outputStream;  // Указатель на поток файла выходных данных
+    std::string data_dir;           // Директория проекта
 };
 
 

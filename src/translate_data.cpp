@@ -96,7 +96,7 @@ namespace translate
         return 0;
     }
 
-    void ParseCmdLine(int argc, char* argv[], std::string& file_name1, std::string& file_name2, struct SEIRDcfg& seird_cfg)
+    void ParseCmdLine(int argc, char* argv[], std::string& data_dir, std::string& file_name1, std::string& file_name2, struct SEIRDcfg& seird_cfg)
     {
         std::string default_path = "./config/";
         std::string default_filename1 = "humans_work.dat";
@@ -133,10 +133,19 @@ namespace translate
             else
             {
                 std::cout << "Unknown parameter: '" << argv[i] << "'. Use '/?' for help. " << std::endl;
-                exit(0);
+                //exit(0);
             }
         }
 
+        /* Лехе для отладки
+        {
+            std::cout << "Enter path: " <<std::endl;
+            std::cin >> default_path;
+            //default_path += "/";
+        }
+        */
+
+        data_dir = default_path;
         file_name1 = default_path + default_filename1;
         file_name2 = default_path + default_filename2;
         seird_cfg = seird_default;

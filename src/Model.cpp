@@ -9,7 +9,20 @@ Model::Model() :
     m_currentDay(0),
     personNumber(0)
 {
-    m_outputStream = new std::ofstream("output.txt", std::ofstream::trunc);
+    data_dir = "config/";
+    m_outputStream = nullptr;
+    SetProjectDir(data_dir);
+}
+
+void Model::SetProjectDir(const std::string& new_path)
+{
+    data_dir = new_path;
+    if (m_outputStream != nullptr)
+    {
+        m_outputStream->close();
+        delete m_outputStream;
+    }
+    m_outputStream = new std::ofstream(data_dir + "output.txt", std::ofstream::trunc);
 }
 
 Model::~Model()
@@ -99,7 +112,7 @@ void Model::writeOutput()
 // Вывести в выходной файл статистику текущего дня моделирования
 void Model::writeGraphvizFile()
 {
-    std::ofstream outputStream("graph.txt", std::ofstream::trunc);
+    std::ofstream outputStream(data_dir + "graph.txt", std::ofstream::trunc);
     outputStream << "digraph JOB_HIERARHY {" << std::endl;
 
     for (std::vector<Person *>::iterator iter = allPersons.begin(); iter != allPersons.end(); ++iter)

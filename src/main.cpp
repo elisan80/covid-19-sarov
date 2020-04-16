@@ -20,10 +20,13 @@ void main(int argc, char *argv[])
     const int TYPES_DAYS_AMOUNT = 2;            //LEV
     HumansMigration hm(TYPES_DAYS_AMOUNT);      //LEV
 
+    std::string data_dir;
     std::string file_name1;
     std::string file_name2;
     translate::SEIRDcfg seird_cfg;
-    translate::ParseCmdLine(argc, argv, file_name1, file_name2, seird_cfg);
+    translate::ParseCmdLine(argc, argv, data_dir, file_name1, file_name2, seird_cfg);
+
+    model.SetProjectDir(data_dir);
     std::cout << "reading first config file started" << std::endl;
     if (!hm.Init(file_name2, 0)) //выходные дни     //LEV
     {
