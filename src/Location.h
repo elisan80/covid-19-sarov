@@ -24,6 +24,9 @@ public:
     // имеет ли среди агентов распространителей
     bool hasEIRPerson();
 
+    // имеет ли среди агентов
+    bool hasSPerson();
+
     // Моделирование распространения в данной локации на сегодняшний день
     void seirModelling();
 
@@ -31,6 +34,7 @@ public:
     void modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds);
 
 public:
+    int index;
     double m_beta;		// коэффициент перехода от восприимчивого к инкубационному периоду
     double m_alpha;		// коэффициент перехода от инкубационного периода к инфицированию
     double m_gamma;		// коэффициент выздоровления

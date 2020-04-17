@@ -1,4 +1,3 @@
-#include "StdAfx.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -6,20 +5,30 @@
 #include <vector>
 
 #include "lib_migration.h"
+#include "Model.h"
+#include "Person.h"
+#include "Location.h"
 
-
-
-bool HumansConfigReader::TryAddData (std::string &data_string, HumanConfig &storage)
+LocationConfig* HumansConfigReader::TryGetLocationConfigFromString(std::string &data_string)
 {
-	std::istringstream iss (data_string);
-	LocationConfig lc;
+    Model &model = Model::instance();
+	std::istringstream iss(data_string);
+    LocationConfig *config = nullptr;
 	std::string s;
-	try 
+	try
 	{
 		iss >> s;
-		lc.location_id = std::stoi (s);
+		int location_id = std::stoi(s) - LOCATIONS_OFFSET;
+        Location *currentLocation = model.allLocations[location_id];
+        if (!currentLocation)
+        {
+            currentLocation = new Location();
+            currentLocation->index = location_id;
+            model.allLocations[location_id] = currentLocation;
+        }
 
-		iss >> s; //time begin
+        time_t start_time;
+		iss >> s;
 		if (s.find(":") == std::string::npos)
 			return false;
 		else
@@ -28,9 +37,10 @@ bool HumansConfigReader::TryAddData (std::string &data_string, HumanConfig &stor
 			std::istringstream iss2 (s);
 			int hour_1, min_1;
 			iss2 >> hour_1 >> min_1;
-			lc.start_time = hour_1 * 3600 + min_1 * 60;
+			start_time = hour_1 * 3600 + min_1 * 60;
 		}
 	
+        time_t end_time;
 		iss >> s; //time end
 		if (s.find(":") == std::string::npos)
 			return false;
@@ -40,232 +50,124 @@ bool HumansConfigReader::TryAddData (std::string &data_string, HumanConfig &stor
 			std::istringstream iss2 (s);
 			int hour_2, min_2;
 			iss2 >> hour_2 >> min_2;
-			lc.end_time = hour_2 * 3600 + min_2 * 60;
+			end_time = hour_2 * 3600 + min_2 * 60;
 		}
 
-		iss >> lc.min_time;
-		iss >> lc.max_time;
-		iss >> lc.probability;
-	} catch (...)
+        int min_time;
+		iss >> min_time;
+        int max_time;
+		iss >> max_time;
+        double probability;
+		iss >> probability;
+
+        config = new LocationConfig();
+        config->location = currentLocation;
+        config->start_time = start_time;
+        config->end_time = end_time;
+        config->min_time = min_time;
+        config->max_time = max_time;
+        config->probability = probability;
+	}
+    catch (...)
 	{
-		return false;
+		return nullptr;
 	}
 	
-	storage.locations.push_back (lc);
-	//lc.Show();
-	return true;
+	return config;
 }
 
-bool HumansConfigReader::ReadCfg()
+bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay)
 {//Return value:
-//true - все хорошо
-//false - все плохо
+//true - РІСЃРµ С…РѕСЂРѕС€Рѕ
+//false - РІСЃРµ РїР»РѕС…Рѕ
 
-    std::ifstream ifs (_file_name);
-    if (ifs.bad())
+    std::ifstream ifs (file_name, std::ifstream::in);
+    if (!ifs.is_open())
         return false;
 
-	std::string s_d;
-	char buf[1000];
-	std::string pattern  = "[human_id=";
-	HumanConfig one_human;
-	one_human.human_id = -100;
+    Model &model = Model::instance();
+
+	std::string buf;
+	std::string pattern = "[human_id=";
+	HumanConfig humanConfig;
 	
 	while (ifs)
 	{
-		ifs.getline(buf, sizeof(buf));
-		std::string s (buf);
+        int currentHumanID = -1;
+        Person *currentPerson;
+		std::getline(ifs, buf);
 
-		int pos1 = s.find(pattern);
-		if (pos1 != std::string::npos)
-		{//найдено начало новой секции по человеку
-			//найти ИД человека
-			int pos2 = s.find("]");
-			if (pos2 == std::string::npos)
-			{
-				throw std::string ("Error in config file - can't find symbol ']'");
-				return false;
-			}
-			pos1 += pattern.length();
-			std::string s2 = s.substr( pos1, pos2 - pos1);
-			int tmp_id = std::stoi (s2);
-			if (one_human.human_id >= 0)
-			{//сохранить предыдущего человека в массив
-				_humans_config.push_back (one_human);
-			}
-
-			//начинается конфигурация для нового человека
-			one_human.human_id = tmp_id;
-			one_human.locations.clear();
-		}
-		else
+        if (buf[0] == '[')
+        {
+            //РЅР°Р№РґРµРЅРѕ РЅР°С‡Р°Р»Рѕ РЅРѕРІРѕР№ СЃРµРєС†РёРё РїРѕ С‡РµР»РѕРІРµРєСѓ
+            int pos1 = buf.find_first_of('=') + 1;
+            int pos2 = buf.find_first_of(' ');
+            if (pos1 != std::string::npos && pos2 != std::string::npos)
+            {
+                //РЅР°Р№С‚Рё РР” С‡РµР»РѕРІРµРєР°
+                std::string s1 = buf.substr(pos1, pos2 - pos1);
+                currentHumanID = std::stoi(s1);
+                currentPerson = model.allPersons[currentHumanID];
+                if (!currentPerson)
+                {
+                    model.allPersons[currentHumanID] = new Person();
+                    currentPerson = model.allPersons[currentHumanID];
+                    currentPerson->index = currentHumanID;
+                    //РЅР°Р№С‚Рё РР” РґРѕРјР°
+                    int pos3 = buf.find_last_of('=') + 1;
+                    int pos4 = buf.find_first_of(']');
+                    if (pos3 != std::string::npos && pos4 != std::string::npos)
+                    {
+                        std::string s2 = buf.substr(pos3, pos4 - pos3);
+                        int home_id = std::stoi(s2) - LOCATIONS_OFFSET;
+                        Location *currentLocation = model.allLocations.at(home_id);
+                        if (!currentLocation)
+                        {
+                            Home *currentHome = new Home();
+                            currentHome->index = home_id;
+                            currentHome->m_personList.push_back(currentPerson);
+                            currentPerson->m_home = currentHome;
+                            model.allLocations[home_id] = currentHome;
+                        }
+                        else
+                        {
+                            Home *currentHome = dynamic_cast<Home *>(currentLocation);
+                            currentHome->m_personList.push_back(currentPerson);
+                            currentPerson->m_home = currentHome;
+                        }
+                    }
+                }
+            }
+        }
+		else if (buf[0] != '{' && buf[0] != '}')
 		{
-			if (TryAddData (s, one_human))
-			{
-				//std::cout << "Good data\n";
-			}
-		}
+            LocationConfig *config = TryGetLocationConfigFromString(buf);
+            if (config)
+            {
+                if (config->probability == -1)
+                {
+                    // СЌС‚Рѕ СЂР°Р±РѕС‚Р°
+                    currentPerson->m_work = config->location;
+                    config->min_time = config->max_time;
+                    config->probability = 1.0;
+                }
 
-		if (!ifs)
-		{//особый случай - последняя запись
-			_humans_config.push_back (one_human);
+                if (isWorkingDay)
+                {
+                    if (!currentPerson->workingDayConfig)
+                        currentPerson->workingDayConfig = new HumanConfig();
+                    currentPerson->workingDayConfig->locations.push_back(config);
+                }
+                else
+                {
+                    if (!currentPerson->dayOffConfig)
+                        currentPerson->dayOffConfig = new HumanConfig();
+                    currentPerson->dayOffConfig->locations.push_back(config);
+                }
+            }
 		}
+        buf.clear();
 	}
 	
 	return true;
-}
-
-
-HumansMigration::HumansMigration(int days_amount) 
-{
-	srand( (unsigned)time( NULL ) ); //иницаилизацию можно делать по ключу как в наших проектах - для повторяемости результатов.
-	for (int i = 0; i < days_amount; ++i)
-	{
-		_humans_config.push_back(std::list <HumanConfig> ());
-		_humans_time_laps.push_back (std::list<TimeLaps> ());
-	}
-}
-
-bool HumansMigration::Init (const std::string file_name, int day)
-{
-	HumansConfigReader hcr (file_name, _humans_config[day]); //здесь подставлять соответствие нужного файла и соответствующего ему массива
-	hcr.ReadCfg();
-	return true;
-}
-
-void HumansMigration::ShowConfig ()
-{
-	for (int i = 0; i < _humans_config.size(); ++i)
-	{
-		std::cout << "Size = " << _humans_config[i].size() << std::endl;
-		for (auto itr = _humans_config[i].begin(); itr != _humans_config[i].end(); ++itr)
-		{
-			std::cout << "Human_id = " << itr->human_id << std::endl;
-			for (auto itr2 = itr->locations.begin(); itr2 != itr->locations.end(); ++itr2)
-			{
-				itr2->Show();
-			}
-		}
-	}
-}
-
-
-bool HumansMigration::MakeOneMigration (HumanConfig &human_cfg, TimeLaps &time_laps_)
-{//Осуществить перемещение 1 агента (создать расписание по одному агенту)
-	TimeLaps time_laps;
-	time_t cur_time = 0;
-	time_laps.human_id = human_cfg.human_id;
-
-	while (cur_time < (23 * 3600 + 59 * 60) ) //время суток
-	{
-		//найти все локации, в которых агенту разрешено находиться в это время
-		std::vector <LocationConfig> possible_locations;
-		for (auto itr_location = human_cfg.locations.begin(); itr_location != human_cfg.locations.end(); ++itr_location)
-		{
-			if (itr_location->start_time <=cur_time && itr_location->end_time > cur_time) //LEV!!!!! здесь надо еще добавить проверку на то, что миниальное время не переходит границы расписания для этой локации
-			{
-				possible_locations.push_back (*itr_location); //здесь можно сделать на хранение указателей, но сейчас не до этого
-			}
-		}
-
-		if (possible_locations.size() == 0)
-		{
-			std::string err = std::string ("Can't find period for ") + std::to_string (human_cfg.human_id) + std::string (". Time is ") + std::to_string (cur_time);
-			std::cout << err << std::endl;
-			throw (err);
-		}
-
-		//провести розыгрыш вероятностей
-		int pos_min = -1, pos = -1;
-		for (int cnt = 0; cnt < 1000 && pos_min == -1; ++cnt)
-		{
-			for (int i = 0;  i < possible_locations.size(); ++i)
-			{
-				double r = (double)rand() / ((double)RAND_MAX); //LEV!!!! потом надо будет переделать насуммирование вероятностей и равномерное распределение по всему интервалу, потому что сейчас можно просто тупо не попасть в мелки вероятности.
-				if (possible_locations[i].probability >= r)
-				{
-					pos = i;
-					if (pos_min < 0)
-					{
-						pos_min = pos;
-					}
-					else
-					{
-						if (possible_locations[pos_min].probability > possible_locations[pos].probability)
-						{//всегда отдаем приоритет локации с меньшим шансом на выигрыш
-							pos_min = pos;
-						}
-					}
-				}
-			}
-		}
-		if (pos_min == -1)
-		{//если случайность ничего нам не дала то просто возьмем первую попавшуюся локацию
-			std::cout << "WARNING! Using default position!" << std::endl;
-			pos_min = 0;
-		}
-
-		//для победившей локации найдем время пребывания (от мин до макс)
-		int period_time = (double)rand() / (RAND_MAX + 1) * (possible_locations[pos_min].max_time - possible_locations[pos_min].min_time) + possible_locations[pos_min].min_time;
-		if (cur_time + period_time > possible_locations[pos_min].end_time )
-		{
-			period_time = possible_locations[pos_min].end_time - cur_time;
-		}
-
-		Period per;
-		per.location_id = possible_locations[pos_min].location_id;
-		per.start_time = cur_time;
-		per.end_time = cur_time + period_time;
-		time_laps.AllPeriods.push_back (per);
-
-		cur_time += period_time;
-	}
-
-	time_laps_ = time_laps;
-	std::cout << "One migration is ready\n";
-}
-
-bool HumansMigration::MakeAllMigrations ()
-{//Осуществить все перемещения агентов
-	for (int i = 0; i < _humans_config.size(); ++i)
-	{
-		for (auto itr1 = _humans_config[i].begin(); itr1 != _humans_config[i].end(); ++itr1)
-		{
-			TimeLaps one_agent_time_laps;
-			if (MakeOneMigration (*itr1, one_agent_time_laps))
-			{
-				_humans_time_laps[i].push_back (one_agent_time_laps);
-			}
-		}
-	}
-	return true;
-}
-
-bool HumansMigration::MakeDayMigration (int day_index)
-{// Осуществить перемещения агентов на указанный день
-	for (auto itr1 = _humans_config[day_index].begin(); itr1 != _humans_config[day_index].end(); ++itr1)
-	{
-		TimeLaps one_agent_time_laps;
-		if (MakeOneMigration (*itr1, one_agent_time_laps))
-		{
-			_humans_time_laps[day_index].push_back (one_agent_time_laps);
-		}
-	}
-	return true;
-}
-
-void HumansMigration::ShowMigration(std::string show_path)
-{//по указанному пути создать файлы. по одному на каждого агента, с его таймлапсами
-	for (int i = 0; i < _humans_time_laps.size(); ++i)
-	{
-		for (auto itr = _humans_time_laps[i].begin(); itr != _humans_time_laps[i].end(); ++itr)
-		{
-			std::string file_name = show_path + "_day_" + std::to_string (i) + "_agent_id_" + std::to_string (itr->human_id);
-			std::ofstream ofs (file_name);
-			for (auto itr2 = itr->AllPeriods.begin(); itr2 != itr->AllPeriods.end(); ++itr2)
-			{
-				ofs << itr2->location_id << "\t" << itr2->start_time << "\t" << itr2->end_time << "\t" << "len=" << itr2->end_time - itr2->start_time << std::endl;
-			}
-		}
-	}
 }

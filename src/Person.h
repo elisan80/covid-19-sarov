@@ -8,6 +8,7 @@ class Group;
 class Archive;
 class Library;
 class Canteen;
+struct HumanConfig;
 
 // Базовый класс агента, имеет расписание на день, текущее состояние
 class Person
@@ -17,10 +18,7 @@ public:
 	virtual ~Person() {}
 
     // генерация расписания рабочего дня
-    virtual void generateShedule();
-
-    // генерация расписания выходного дня
-	void generateDayOffShedule();
+    virtual void generateShedule(bool isWorkingDay);
 
     // Сообщить локации о своем присутствии сегодня
     void notifyLocations();
@@ -40,21 +38,26 @@ public:
     // изменить состояние на "Умерший"
     virtual void setDead(double time);
 
-    // установить карантин (пока нет мед помощи сидит дома)
+    // установить карантин (пока нет моделирования мед помощи сидит дома)
     void setQuarantine();
 
 public:
+    int index;
 	SEIR_State m_state;			        // состояние по SEIR-модели
 	Location *m_home;			        // локация по-умолчанию
+	Location *m_work;			        // локация работа
 	PersonShedule m_shedule;	        // расписание на день
 
-    double m_timeExposed;
-    Person *m_exposedSource;
-    double m_timeSymptoms;
-    double m_timeInfected;
-    double m_timeRecovered;
-    double m_timeDead;
-    bool m_isOnQuarantine;
+    double m_timeExposed;               // день и время заражения
+    Person *m_exposedSource;            // заразивший
+    double m_timeSymptoms;              // день и время появления симптомов
+    double m_timeInfected;              // день и время инфицирования
+    double m_timeRecovered;             // день и время выздоровления
+    double m_timeDead;                  // день и время смерти
+    bool m_isOnQuarantine;              // признак нахождения на карантине
+
+    HumanConfig *workingDayConfig;
+    HumanConfig *dayOffConfig;
 };
 
 // Класс домосед - сидит дома 24/7
@@ -97,7 +100,7 @@ public:
 };
 
 // Класс работник архива
-// относится к своему первому отделу
+// относится к своему архиву
 // может ходить в столовую
 // ходит в библиотеку?
 class ArchiveEmployee : public OrganizationEmployee
