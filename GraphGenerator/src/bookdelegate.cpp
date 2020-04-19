@@ -53,7 +53,7 @@
 #include <QtWidgets>
 
 BookDelegate::BookDelegate(QObject *parent)
-    : QSqlRelationalDelegate(parent), star(QPixmap(":images/star.png"))
+    : QSqlRelationalDelegate(parent), star(QPixmap())
 {
 }
 

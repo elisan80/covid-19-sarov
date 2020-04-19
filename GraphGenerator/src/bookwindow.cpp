@@ -126,15 +126,15 @@ void BookWindow::generateDBHuman()
         return;
     }
 
-
-    ui.bookTable->setColumnHidden(model->fieldIndex("id"), true);
     model->setTable("humans");
+
 
     // Populate the model:
     if (!model->select()) {
         showError(model->lastError());
         return;
     }
+    ui.bookTable->setColumnHidden(0/*model->fieldIndex("id")*/, true);
     while(model->canFetchMore())
             model->fetchMore();
 
@@ -382,6 +382,12 @@ void BookWindow::generateHumansFile()
         QRandomGenerator rg = QRandomGenerator();
         rg.seed(genseed);
 
+        auto ls = ui.lineEditTimeShopsClose->text().split(":");
+        auto maxintervalForShopsVisit = ls.at(0).toInt()*3600 + ls.at(1).toInt()*60 - 28800;
+
+        ls = ui.lineEditWorkDayEnd->text().split(":");
+        auto maxintervalForWorkPlacesVisit = ls.at(0).toInt()*3600 + ls.at(1).toInt()*60 - 28800;
+
         for(int i=0;i<model->rowCount();i++)
         {
             oneString.clear();
@@ -399,11 +405,13 @@ void BookWindow::generateHumansFile()
             oneString = "[human_id=" +  humanIdStr + " home_id=" + homeStr + "]\n";
             oneString += "{\n";
 
+
+
             if(isHoliday)
             {
                 if(jobPlace >= ShopBeginIndex && jobPlace < ShopBeginIndex+ui.ShopNum->text().toInt())
                 {
-                     oneString += jobStr + " 08:00 22:00 50400 50400 -1 \n";
+                     oneString += jobStr + " 08:00 "+ ui.lineEditTimeShopsClose->text() +" 60 " + QString::number(maxintervalForShopsVisit) + " -1 \n";
                 }
                 else
                 {
@@ -411,7 +419,8 @@ void BookWindow::generateHumansFile()
                     {
                        if(!place.isEmpty())
                        {
-                           oneString += place + " 08:00 22:00 1800 3600 " + QString::number(probGoToEachShop) + "\n";
+                           oneString += place + " 08:00 "+ ui.lineEditTimeShopsClose->text() +" "+ ui.lineEditMinTimeInShop->text()
+                                   +" "+ ui.lineEditMaxTimeInShop->text() +" " + QString::number(probGoToEachShop) + "\n";
                        }
                     }
                 }
@@ -427,24 +436,26 @@ void BookWindow::generateHumansFile()
                     if(probToWork < workPercent) working = true;
 
                     if(jobPlace >= ShopBeginIndex && jobPlace < ShopBeginIndex+ui.ShopNum->text().toInt())
-                    {
-                         oneString += jobStr + " 08:00 22:00 50400 50400 -1 \n";
+                    {                       
+                         oneString += jobStr + " 08:00 "+ ui.lineEditTimeShopsClose->text() +" 60 " + QString::number(maxintervalForShopsVisit) + " -1 \n";
                     }
                     else if(working)
                     {
-                        oneString += jobStr + " 08:00 14:00 600 33120 -1 \n";
+                        oneString += jobStr + " 08:00 "+ ui.lineEditWorkDayEnd->text() +" 600 " + QString::number(maxintervalForWorkPlacesVisit) + " -1 \n";
 
                         chiefStr = jobGraphToUp.value(jobStr);
                         if(!chiefStr.isEmpty())
                         {
-                            oneString += chiefStr + " 08:00 14:00 600 3600 0.2 \n";
+                            oneString += chiefStr + " 08:00 "+ ui.lineEditWorkDayEnd->text() +" "+ ui.lineEditMinTimeInOtdel->text()
+                                    +" "+ ui.lineEditMaxTimeInOtdel->text() +" "+ ui.lineEditProbGoToOtdel->text() +" \n";
                         }
                         QStringList places = getNeighboursJobPlaces(jobStr);//архив и прочая...
 
                         foreach (auto place, places)
                         {
                            if(!place.isEmpty())
-                              oneString += place + " 08:00 14:00 2000 3600 0.2 \n";
+                              oneString += place + " 08:00 "+ ui.lineEditWorkDayEnd->text() +" "+ ui.lineEditMinTimeInLibr->text()
+                                      +" "+ ui.lineEditMaxTimeInLibr->text() +" "+ ui.lineEditProbGoToLibr->text() +" \n";
                         }
                     }
                     else
@@ -453,7 +464,8 @@ void BookWindow::generateHumansFile()
                         {
                            if(!place.isEmpty())
                            {
-                               oneString += place + " 08:00 14:00 1800 3600 " + QString::number(probGoToEachShop) + "\n";
+                               oneString += place + " 08:00 "+ ui.lineEditWorkDayEnd->text() +" "+ ui.lineEditMinTimeInShop->text()
+                                       +" "+ ui.lineEditMaxTimeInShop->text() +" " + QString::number(probGoToEachShop) + "\n";
                            }
                         }
                     }
@@ -464,7 +476,8 @@ void BookWindow::generateHumansFile()
                     {
                        if(!place.isEmpty())
                        {
-                           oneString += place + " 08:00 14:00 1800 3600 " + QString::number(probGoToEachShop) + "\n";
+                           oneString += place + " 08:00 "+ ui.lineEditWorkDayEnd->text() +" "+ ui.lineEditMinTimeInShop->text()
+                                   +" "+ ui.lineEditMaxTimeInShop->text() +" " + QString::number(probGoToEachShop) + "\n";
                        }
                     }
                 }
@@ -472,7 +485,8 @@ void BookWindow::generateHumansFile()
                 {
                    if(!place.isEmpty())
                    {
-                       oneString += place + " 14:00 22:00 1800 3600 " + QString::number(probGoToEachShop) + "\n";
+                       oneString += place + " 14:00 "+ ui.lineEditTimeShopsClose->text() +" "+ ui.lineEditMinTimeInShop->text()
+                               +" "+ ui.lineEditMaxTimeInShop->text() +" " + QString::number(probGoToEachShop) + "\n";
                    }
                 }
             }
