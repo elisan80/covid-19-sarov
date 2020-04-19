@@ -1,14 +1,18 @@
 #include "data_types.h"
-#include <iostream>
 #include <string>
-#include <vector>
 
 class HumansConfigReader
 {
 public:
     HumansConfigReader() {}
-	bool ReadCfg(const std::string &file_name, bool isWorkingDay);
 
+    //
+	bool readHumanConfig(const std::string &file_name, bool isWorkingDay);
+
+    //
+    bool readModelConfig(const std::string &file_name);
+
+protected:
     LocationConfig* TryGetLocationConfigFromString(std::string &data_string);
 };
 

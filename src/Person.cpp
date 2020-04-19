@@ -7,6 +7,8 @@
 Person::Person() :
     index(-1),
     m_state(Susceptible),
+    m_home(nullptr),
+    m_work(nullptr),
     m_timeExposed(-1.0),
     m_exposedSource(nullptr),
     m_timeSymptoms(-1.0),
@@ -18,7 +20,31 @@ Person::Person() :
     dayOffConfig(nullptr)
 {
     Model &model = Model::instance();
-    ++model.personNumber;
+    //model.susceptiblePersons.push_back(this);
+    ++model.personCount;
+}
+
+Person::~Person()
+{
+    if (workingDayConfig)
+    {
+        for (std::list<LocationConfig *>::iterator iter = workingDayConfig->locations.begin(); iter != workingDayConfig->locations.end(); ++iter)
+        {
+            delete *iter;
+        }
+        delete workingDayConfig;
+        workingDayConfig = nullptr;
+    }
+
+    if (dayOffConfig)
+    {
+        for (std::list<LocationConfig *>::iterator iter = dayOffConfig->locations.begin(); iter != dayOffConfig->locations.end(); ++iter)
+        {
+            delete *iter;
+        }
+        delete dayOffConfig;
+        dayOffConfig = nullptr;
+    }
 }
 
 void Person::generateShedule(bool isWorkingDay)
@@ -76,14 +102,12 @@ void Person::checkState()
 
     if (m_isOnQuarantine && m_state == Infectious) // на карантине
     {
-        double myItoRProbability = ItoRProbabilityWithMedic;
-        double myItoDProbability = ItoDProbabilityWithMedic;
-        double randValueItoR = (std::rand() % 100) / 100.0;
-        double randValueItoD = (std::rand() % 100) / 100.0;
+        double myItoRProbability = model.params[ItoRProbabilityWithMedic];
+        double myItoDProbability = model.params[ItoDProbabilityWithMedic];
 
-        if (randValueItoR < myItoRProbability) // с вероятностью myItoRProbability выздоровел
+        if (eventWithProbability(myItoRProbability)) // с вероятностью myItoRProbability выздоровел
             setRecovered(model.m_currentDay + (std::rand() % 86400));
-        else if (randValueItoD < myItoDProbability) // с вероятностью myItoDProbability умер
+        else if (eventWithProbability(myItoDProbability)) // с вероятностью myItoDProbability умер
             setDead(model.m_currentDay + (std::rand() % 86400));
     }
 }
@@ -92,17 +116,28 @@ void Person::checkState()
 void Person::setExposed(Person *source, double time)
 {
     m_state = Exposed;
-    m_timeExposed = time;
-    m_exposedSource = source;
-
-    double myEtoIDuration = EtoIDuration; // todo add random
-    m_timeInfected = time + myEtoIDuration;
-
-    double myEtoSymptomsDuration = EtoSymptomsDuration; // todo add random
-    m_timeSymptoms = time + myEtoSymptomsDuration;
 
     Model &model = Model::instance();
-    model.exposedPersons.push_back(this);
+    m_EtoIDuration = model.params[EtoIDuration]; // todo add random
+
+    if (time >= 0.0) // зараженный во время моделирования
+    {
+        m_timeExposed = time;
+        m_exposedSource = source;
+
+        m_timeInfected = time + m_EtoIDuration;
+    }
+    else // зараженный до моделирования
+    {
+        m_timeExposed = -m_EtoIDuration;
+        m_exposedSource = source;
+
+        m_timeInfected = 0.0;
+    }
+
+    ++model.exposedPersonsCount;
+    //model.exposedPersons.push_back(this);
+    //model.susceptiblePersons.remove(this);
 }
 
 // изменить состояние на "Инфицированный"
@@ -111,8 +146,13 @@ void Person::setInfectious()
     m_state = Infectious;
 
     Model &model = Model::instance();
-    model.infectedPersons.push_back(this);
-    model.exposedPersons.remove(this);
+    m_EtoSymptomsDuration = model.params[EtoSymptomsDuration]; // todo add random
+    m_timeSymptoms = m_timeExposed + m_EtoSymptomsDuration;
+
+    ++model.infectedPersonsCount;
+    --model.exposedPersonsCount;
+    //model.infectedPersons.push_back(this);
+    //model.exposedPersons.remove(this);
 }
 
 // изменить состояние на "Выздоровевший"
@@ -122,8 +162,11 @@ void Person::setRecovered(double time)
     m_timeRecovered = time;
 
     Model &model = Model::instance();
-    model.recoveredPersons.push_back(this);
-    model.infectedPersons.remove(this);
+    ++model.recoveredPersonsCount;
+    --model.infectedPersonsCount;
+
+    //model.recoveredPersons.push_back(this);
+    //model.infectedPersons.remove(this);
 }
 
 // изменить состояние на "Умерший"
@@ -133,13 +176,34 @@ void Person::setDead(double time)
     m_timeDead = time;
 
     Model &model = Model::instance();
-    model.deadPersons.push_back(this);
-    model.infectedPersons.remove(this);
+    ++model.deadPersonsCount;
+    --model.infectedPersonsCount;
+
+    //model.deadPersons.push_back(this);
+    //model.infectedPersons.remove(this);
 }
 
 void Person::setQuarantine()
 {
     m_isOnQuarantine = true;
-    workingDayConfig = nullptr;
-    dayOffConfig = nullptr;
+    
+    if (workingDayConfig)
+    {
+        for (std::list<LocationConfig *>::iterator iter = workingDayConfig->locations.begin(); iter != workingDayConfig->locations.end(); ++iter)
+        {
+            delete *iter;
+        }
+        delete workingDayConfig;
+        workingDayConfig = nullptr;
+    }
+
+    if (dayOffConfig)
+    {
+        for (std::list<LocationConfig *>::iterator iter = dayOffConfig->locations.begin(); iter != dayOffConfig->locations.end(); ++iter)
+        {
+            delete *iter;
+        }
+        delete dayOffConfig;
+        dayOffConfig = nullptr;
+    }
 }

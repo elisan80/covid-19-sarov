@@ -2,7 +2,6 @@
 #define _DATA_TYPES_MIGRATION_
 
 #include <iostream>
-#include <time.h>
 #include <list>
 
 const int LOCATIONS_OFFSET = 100000; //данное число вычитается из идентификатора локации

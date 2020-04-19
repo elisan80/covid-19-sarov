@@ -4,11 +4,17 @@
 #include "Model.h"
 
 Location::Location() :
-    index(-1),
-    m_beta(EtoSProbability),
-    m_gamma(1.0 / (EtoSymptomsDuration - EtoIDuration)),
-    m_alpha(ItoRProbability)
+    index(-1)
 {
+    m_scale = Model::instance().params[DefaultScale];
+}
+
+Location* Location::createLocationByIndex(int index)
+{
+    if (index >= 130050 && index <= 130100)
+        return new Shop();
+    
+    return new Location();
 }
 
 bool Location::hasEIRPerson()
@@ -42,10 +48,9 @@ void Location::seirModelling()
     if (!hasEIRPerson() || !hasSPerson())
         return;
 
+    Model &model = Model::instance();
     for (std::list<LocationSheduleSection>::iterator iter = m_locationShedule.m_sectionList.begin(); iter != m_locationShedule.m_sectionList.end(); ++iter)
     {
-        Model &model = Model::instance();
-
         double interactionTime = iter->m_timeEnd - iter->m_timeStart;
 
         for (std::list<Person *>::iterator iterPerson = iter->m_personList.begin(); iterPerson != iter->m_personList.end(); ++iterPerson)
@@ -58,7 +63,7 @@ void Location::seirModelling()
                 {
                     if ((*iterTarget)->m_state == Susceptible)
                     {
-                        if (eventWithProbability((iter->m_timeEnd - iter->m_timeStart) / 3600.0))
+                        if (eventWithProbability((iter->m_timeEnd - iter->m_timeStart) * m_scale / 3600.0))
                             modelContact(*iterPerson, *iterTarget, iter->m_timeStart, iter->m_timeEnd);
                     }
                 }
@@ -69,29 +74,34 @@ void Location::seirModelling()
 
 void Location::modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds)
 {
+    Model &model = Model::instance();
+
     double probability = 0.0;
     switch (source->m_state)
     {
     case Exposed:
-        probability = EtoSProbability;
+        probability = model.params[EtoSTransferProbability];
         break;
     case Infectious:
-        probability = ItoSProbability;
+        probability = model.params[ItoSTransferProbability];
         break;
     case Recovered:
-        probability = RtoSProbability;
+        probability = model.params[RtoSTransferProbability];
         break;
     default:
         break;
     }
 
-    Model &model = Model::instance();
-    double randValue = (std::rand() % 100) / 100.0;
-    if (randValue < probability)
+    if (eventWithProbability(probability))
         target->setExposed(source, model.m_currentDay + ((timeStartInSeconds + timeEndInSeconds)/2.0)/86400.0);
 }
 
 Home::Home()
 {
-    m_beta = EtoSProbability * 2.0; // Увеличенная вероятность заражения дома
+    m_scale = Model::instance().params[HomeScale];
+}
+
+Shop::Shop()
+{
+    m_scale = Model::instance().params[ShopScale];
 }

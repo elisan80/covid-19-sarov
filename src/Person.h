@@ -1,6 +1,6 @@
 #pragma once
 #include "PersonShedule.h"
-#include "SEIR_model.h"
+#include "Model.h"
 
 class Location;
 class Area;
@@ -15,7 +15,7 @@ class Person
 {
 public:
 	Person();
-	virtual ~Person() {}
+    virtual ~Person();
 
     // генерация расписания рабочего дня
     virtual void generateShedule(bool isWorkingDay);
@@ -48,6 +48,8 @@ public:
 	Location *m_work;			        // локация работа
 	PersonShedule m_shedule;	        // расписание на день
 
+    double m_EtoIDuration;
+    double m_EtoSymptomsDuration;
     double m_timeExposed;               // день и время заражения
     Person *m_exposedSource;            // заразивший
     double m_timeSymptoms;              // день и время появления симптомов

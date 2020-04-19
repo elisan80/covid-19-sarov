@@ -1,21 +1,16 @@
 #include "translate_data.h"
-#include <iostream> 
-#include "lib_migration.h" 
-#include "Model.h"
-#include "Person.h"
-#include "Location.h"
+
+#include <iostream>
+#include <filesystem>
+#include <direct.h>
+
+#include "lib_migration.h"
 
 namespace translate
 {
-    void ParseCmdLine(int argc, char* argv[], std::string& data_dir, std::string& file_name1, std::string& file_name2, struct SEIRDcfg& seird_cfg)
+    void ParseCmdLine(int argc, char* argv[], std::string& data_dir)
     {
-        std::string default_path = "./config/";
-        std::string default_filename1 = "humans_work.dat";
-        std::string default_filename2 = "humans_holiday.dat";
-
-        SEIRDcfg seird_default;
-        seird_default.alpha = 0.1; //заполнить здесь правильными значениями
-        seird_default.betta = 0.2;
+        std::string default_path = "\\config\\";
 
         for (int i = 1; i < argc; ++i)
         {
@@ -34,11 +29,15 @@ namespace translate
                     std::cout << "There is no value for Path." << std::endl;
                     exit(0);
                 }
-               
+
                 default_path = argv[i];
+                if (default_path[0] != '/' && default_path[0] != '\\')
+                {
+                    default_path = "\\" + default_path;
+                }
                 if (default_path[default_path.length() - 1] != '/' && default_path[default_path.length() - 1] != '\\')
                 {
-                    default_path += "/";
+                    default_path += "\\";
                 }
             }
             else if (s == "-d")
@@ -46,7 +45,7 @@ namespace translate
                 // для отладки
                 std::cout << "Enter path: " << std::endl;
                 std::cin >> default_path;
-                default_path += "/";
+                default_path += "\\";
             }
             else
             {
@@ -55,9 +54,11 @@ namespace translate
             }
         }
 
-        data_dir = default_path;
-        file_name1 = default_path + default_filename1;
-        file_name2 = default_path + default_filename2;
-        seird_cfg = seird_default;
+
+        char buff[FILENAME_MAX];
+        _getcwd(buff, FILENAME_MAX);
+        std::string currentDir(buff);
+
+        data_dir = currentDir + default_path;
     }
 };

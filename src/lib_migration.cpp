@@ -18,11 +18,12 @@ LocationConfig* HumansConfigReader::TryGetLocationConfigFromString(std::string &
 	try
 	{
 		iss >> s;
-		int location_id = std::stoi(s) - LOCATIONS_OFFSET;
+        int location_id_offset = std::stoi(s);
+		int location_id = location_id_offset - LOCATIONS_OFFSET;
         Location *currentLocation = model.allLocations[location_id];
         if (!currentLocation)
         {
-            currentLocation = new Location();
+            currentLocation = Location::createLocationByIndex(location_id_offset);
             currentLocation->index = location_id;
             model.allLocations[location_id] = currentLocation;
         }
@@ -76,7 +77,7 @@ LocationConfig* HumansConfigReader::TryGetLocationConfigFromString(std::string &
 	return config;
 }
 
-bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay)
+bool HumansConfigReader::readHumanConfig(const std::string &file_name, bool isWorkingDay)
 {//Return value:
 //true - все хорошо
 //false - все плохо
@@ -90,18 +91,18 @@ bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay
 	std::string buf;
 	std::string pattern = "[human_id=";
 	HumanConfig humanConfig;
-	
+
+    Person *currentPerson;
 	while (ifs)
 	{
         int currentHumanID = -1;
-        Person *currentPerson;
 		std::getline(ifs, buf);
 
-        if (buf[0] == '[')
+        if (!buf.empty() && buf[0] == '[')
         {
             //найдено начало новой секции по человеку
-            int pos1 = buf.find_first_of('=') + 1;
-            int pos2 = buf.find_first_of(' ');
+            size_t pos1 = buf.find_first_of('=') + 1;
+            size_t pos2 = buf.find_first_of(' ');
             if (pos1 != std::string::npos && pos2 != std::string::npos)
             {
                 //найти ИД человека
@@ -114,8 +115,8 @@ bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay
                     currentPerson = model.allPersons[currentHumanID];
                     currentPerson->index = currentHumanID;
                     //найти ИД дома
-                    int pos3 = buf.find_last_of('=') + 1;
-                    int pos4 = buf.find_first_of(']');
+                    size_t pos3 = buf.find_last_of('=') + 1;
+                    size_t pos4 = buf.find_first_of(']');
                     if (pos3 != std::string::npos && pos4 != std::string::npos)
                     {
                         std::string s2 = buf.substr(pos3, pos4 - pos3);
@@ -139,7 +140,7 @@ bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay
                 }
             }
         }
-		else if (buf[0] != '{' && buf[0] != '}')
+		else if (!buf.empty() && buf[0] != '{' && buf[0] != '}')
 		{
             LocationConfig *config = TryGetLocationConfigFromString(buf);
             if (config)
@@ -147,9 +148,14 @@ bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay
                 if (config->probability == -1)
                 {
                     // это работа
-                    currentPerson->m_work = config->location;
-                    config->min_time = config->max_time;
-                    config->probability = 1.0;
+                    Work *currentWork = dynamic_cast<Work *>(config->location);
+                    if (currentWork)
+                    {
+                        currentPerson->m_work = currentWork;
+                        currentWork->m_employeeList.push_back(currentPerson);
+                        config->min_time = config->max_time;
+                        config->probability = 1.0;
+                    }
                 }
 
                 if (isWorkingDay)
@@ -170,4 +176,50 @@ bool HumansConfigReader::ReadCfg(const std::string &file_name, bool isWorkingDay
 	}
 	
 	return true;
+}
+
+bool HumansConfigReader::readModelConfig(const std::string &file_name)
+{
+    std::ifstream ifs(file_name, std::ifstream::in);
+    if (!ifs.is_open())
+        return false;
+
+    Model &model = Model::instance();
+
+    while (ifs)
+    {
+        std::string buf;
+        std::getline(ifs, buf);
+        if (!buf.empty() && (buf[0] != '#'))
+        {
+            std::istringstream iss(buf);
+            std::string paramName;
+            try
+            {
+                iss >> paramName;
+                if (!paramName.empty())
+                {
+                    if (paramName.compare(gnuPlotPath) == 0)
+                    {
+                        size_t pos1 = buf.find_first_of('\"') + 1;
+                        size_t pos2 = buf.find('\"', pos1);
+                        std::string paramValue = buf.substr(pos1, pos2 - pos1);
+                        model.m_gnuPlotPath = paramValue;
+                    }
+                    else if (model.params.find(paramName) != model.params.end())
+                    {
+                        double paramValue;
+                        iss >> paramValue;
+                        model.params[paramName] = paramValue;
+                    }
+                }
+            }
+            catch (...)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

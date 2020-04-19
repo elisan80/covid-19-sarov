@@ -1,6 +1,6 @@
 #pragma once
 
-#include <list>
+#include <vector>
 
 #include "LocationShedule.h"
 
@@ -31,13 +31,15 @@ public:
     void seirModelling();
 
     // Моделирование контакта source-target
-    void modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds);
+    virtual void modelContact(Person *source, Person *target, double timeStartInSeconds, double timeEndInSeconds);
+
+    //
+    static Location* createLocationByIndex(int index);
 
 public:
     int index;
-    double m_beta;		// коэффициент перехода от восприимчивого к инкубационному периоду
-    double m_alpha;		// коэффициент перехода от инкубационного периода к инфицированию
-    double m_gamma;		// коэффициент выздоровления
+
+    double m_scale;
 
     LocationShedule m_locationShedule;
 };
@@ -59,7 +61,7 @@ public:
     Work() {}
     virtual ~Work() {}
 
-    std::list<Employee *> m_employeeList;// список работников
+    std::list<Person *> m_employeeList;// список работников
 };
 
 class Organization : public Location
@@ -146,4 +148,12 @@ public:
     std::list<Employee *> m_employeeList; // список подчиненных
     double m_meetingProbability;        // вероятность планерки
     double m_meetingDuration;           // длительность планерки
+};
+
+// Класс отдела
+class Shop : public Work
+{
+public:
+    Shop();
+    ~Shop() {}
 };
